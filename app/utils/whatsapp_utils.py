@@ -2,10 +2,14 @@ import logging
 from flask import current_app, jsonify
 import json
 import requests
-
+ 
 from app.services.openai_service import generate_response
 import re
 
+
+def get_chatbot_manager():
+    # Access current_app inside a function, which should be called within a request's context
+    return current_app.chatbot_manager
 
 def log_http_response(response):
     logging.info(f"Status: {response.status_code}")
@@ -84,9 +88,12 @@ def process_whatsapp_message(body):
 
     # TODO: implement custom function here
     # response = generate_response(message_body)
-
+    
+    # Use chatbot_manager to handle the message
+    chatbot_manager = get_chatbot_manager()
+    response = chatbot_manager.handle_incoming_message(wa_id, message_body,name)
     # OpenAI Integration
-    response = generate_response(message_body, wa_id, name)
+    #response = generate_response(message_body, wa_id, name)
     response = process_text_for_whatsapp(response)
 
     data = get_text_message_input(current_app.config["RECIPIENT_WAID"], response)

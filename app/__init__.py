@@ -1,6 +1,8 @@
 from flask import Flask
 from app.config import load_configurations, configure_logging
 from .views import webhook_blueprint
+from .models.chatbot import ChatBotManager
+
 
 
 def create_app():
@@ -9,6 +11,8 @@ def create_app():
     # Load configurations and logging settings
     load_configurations(app)
     configure_logging()
+    
+    app.chatbot_manager = ChatBotManager()
 
     # Import and register blueprints, if any
     app.register_blueprint(webhook_blueprint)

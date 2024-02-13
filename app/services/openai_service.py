@@ -44,7 +44,7 @@ def store_thread(wa_id, thread_id):
         threads_shelf[wa_id] = thread_id
 
 
-def run_assistant(thread, name):
+def run_assistant(thread, name,chatbot):
     # Retrieve the Assistant
     assistant = client.beta.assistants.retrieve(OPENAI_ASSISTANT_ID)
 
@@ -64,7 +64,7 @@ def run_assistant(thread, name):
             for tool_call in run.required_action.submit_tool_outputs.tool_calls:
                 function_name = tool_call.function.name
                 arguments = json.loads(tool_call.function.arguments)
-                output = deliver_func(function_name, arguments)
+                output = chatbot.handle_intent(function_name, arguments)
                 tool_outputs.append({
                     "tool_call_id": tool_call.id,
                     "output": output,
@@ -86,7 +86,7 @@ def run_assistant(thread, name):
     return new_message
 
 
-def generate_response(message_body, wa_id, name):
+def generate_response(message_body, wa_id, name, chatbot):
     # Check if there is already a thread_id for the wa_id
     thread_id = check_if_thread_exists(wa_id)
 
@@ -110,7 +110,7 @@ def generate_response(message_body, wa_id, name):
     )
 
     # Run the assistant and get the new message
-    new_message = run_assistant(thread, name)
+    new_message = run_assistant(thread, name,chatbot)
 
     return new_message
 
@@ -118,16 +118,3 @@ def generate_response(message_body, wa_id, name):
 # generate_response('hello,what can you do', "18574729966", "yiran")
 
 
-# Implement the logic to handle different function calls
-def deliver_func(function_name, arguments):
-    if function_name == "reservation_intend":
-        return "reservation has been make by our employee #34872 includ this number in your response"
-        
-    elif function_name == "add_task":
-        # TODO implement flask to manage user session 
-        return "yes"
-  
-    else:
-        raise ValueError(f"Unknown function: {function_name}")
-
-    return "Function output here"
